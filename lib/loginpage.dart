@@ -1,11 +1,13 @@
-// ignore_for_file: prefer_const_constructors, unused_element, deprecated_member_use, unused_local_variable, prefer_final_fields, unused_field
+// ignore_for_file: prefer_const_constructors, unused_element, deprecated_member_use, unused_local_variable, prefer_final_fields, unused_field, prefer_collection_literals
 
 import 'dart:convert';
 
 import 'package:app_1/constants.dart';
-import 'package:app_1/post.dart';
+import 'package:app_1/list.dart';
+import 'package:app_1/user_model.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 
 class MyHomePage extends StatefulWidget {
   const MyHomePage({Key? key}) : super(key: key);
@@ -61,23 +63,7 @@ class _MyHomePageState extends State<MyHomePage> {
                   borderRadius: BorderRadius.circular(30)),
               color: mainColor,
               onPressed: () async {
-                http.Response response = await http.post(
-                  Uri.parse(url),
-                  headers: <String, String>{
-                    'Content-Type': 'application/json; charset=UTF-8',
-                  },
-                  body: jsonEncode(<String, String>{
-                    'email': emailController.text,
-                  }),
-                );
-                print(response.body);
-                if (response.statusCode == 201) {
-                  Navigator.push(
-                      context, MaterialPageRoute(builder: (context) => Post()));
-                } else {
-                  Scaffold.of(context)
-                      .showSnackBar(SnackBar(content: Text('Processing Data')));
-                }
+                loginMethod();
               },
               child: Text(
                 'login',
@@ -165,5 +151,33 @@ class _MyHomePageState extends State<MyHomePage> {
         }),
       ),
     );
+  }
+
+  loginMethod() async {
+    http.Response response = await http.get(
+      Uri.parse(url),
+    );
+
+    if (response.statusCode == 200) {
+      List<Users> user = usersFromJson(response.body);
+      int index =
+          user.indexWhere((element) => emailController.text == element.email);
+      if (index == -1) {
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text('User not exist')));
+      } else {
+        SharedPreferences _prefs = await SharedPreferences.getInstance();
+        _prefs.setInt('id', user[index].id);
+        _prefs.setString('name', user[index].name);
+        _prefs.setString('email', user[index].email);
+        Navigator.push(
+            context, MaterialPageRoute(builder: (context) => ListPage()));
+      }
+      // .where((element) => emailController.text == element.email)
+      // .first;
+    } else {
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text('Processing Data')));
+    }
   }
 }

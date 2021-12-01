@@ -1,28 +1,26 @@
-// ignore_for_file: avoid_unnecessary_containers, prefer_const_constructors, prefer_final_fields, unused_field, unnecessary_brace_in_string_interps, avoid_print
+// ignore_for_file: prefer_const_constructors, unused_field, unnecessary_brace_in_string_interps, avoid_print
 
-import 'package:app_1/comments.dart';
-import 'package:app_1/post_model.dart';
+import 'package:app_1/todos_model.dart';
 import 'package:http/http.dart' as http;
-
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-class Post extends StatefulWidget {
-  const Post({Key? key}) : super(key: key);
+class Todos extends StatefulWidget {
+  const Todos({Key? key}) : super(key: key);
 
   @override
-  _PostState createState() => _PostState();
+  _TodosState createState() => _TodosState();
 }
 
-class _PostState extends State<Post> {
-  final url = "https://jsonplaceholder.typicode.com/posts";
-  Future<List<Posts>> _fetchPosts() async {
+class _TodosState extends State<Todos> {
+  final url = "https://jsonplaceholder.typicode.com/todos";
+  Future<List<TodosModel>> _fetchPosts() async {
     await _loadCounter();
 
-    final url = "https://jsonplaceholder.typicode.com/posts/?userId=${_id}";
+    final url = "https://jsonplaceholder.typicode.com/todos/?userId=${_id}";
     try {
       final response = await http.get(Uri.parse(url));
-      return postsFromJson(response.body);
+      return todosModelFromJson(response.body);
     } catch (err) {
       return [];
     }
@@ -44,9 +42,9 @@ class _PostState extends State<Post> {
     return Scaffold(
         appBar: AppBar(
           backgroundColor: Colors.blueGrey,
-          title: Text('Posts'),
+          title: Text('Todos'),
         ),
-        body: FutureBuilder<List<Posts>>(
+        body: FutureBuilder<List<TodosModel>>(
           future: _fetchPosts(),
           builder: (context, snapshot) {
             if (snapshot.hasData) {
@@ -58,11 +56,11 @@ class _PostState extends State<Post> {
                       padding: EdgeInsets.symmetric(horizontal: 5, vertical: 5),
                       child: GestureDetector(
                         onTap: () {
-                          Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) =>
-                                      Comments(id: snapshot.data![index].id)));
+                          // Navigator.push(
+                          //     context,
+                          //     MaterialPageRoute(
+                          //         builder: (context) =>
+                          //             Comments(id: snapshot.data![index].id)));
                         },
                         child: Card(
                           color: Colors.blueGrey.shade100,
@@ -78,10 +76,6 @@ class _PostState extends State<Post> {
                               ),
                               Text(
                                 'TITLE:${snapshot.data![index].title}',
-                                style: TextStyle(color: Colors.black),
-                              ),
-                              Text(
-                                'BODY:${snapshot.data![index].body}',
                                 style: TextStyle(color: Colors.black),
                               ),
                             ],
@@ -103,26 +97,4 @@ class _PostState extends State<Post> {
           },
         ));
   }
-
-  // goToComments() async {
-  //   http.Response response = await http.get(
-  //     Uri.parse(url),
-  //   );
-
-  //   if (response.statusCode == 200) {
-  //     List<Posts> post = postsFromJson(response.body);
-  //     print(post.first.id);
-  //     int index1 = post.indexOf(post[7]).toInt();
-  //     SharedPreferences _prefss = await SharedPreferences.getInstance();
-  //     // _prefss.setString('userModel', jsonEncode(Posts));
-  //     // _prefss.setInt('id', post[index1].id);
-  //     // _prefss.setString('title', post[index1].title);
-  //     // _prefss.setString('body', post[index1].body);
-  //     Navigator.push(
-  //         context, MaterialPageRoute(builder: (context) => Comments()));
-
-  //     // .where((element) => emailController.text == element.email)
-  //     // .first;
-  //   }
-  // }
 }
